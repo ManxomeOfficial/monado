@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+    </head>
+    <body>
+        <div>
+            <div class="webbar">
+                <button onclick="location.href='/home'" style="margin: 10px;">Monado</button>
+                <button onclick="callsidebar()" style="margin-left: auto; margin-right: 10px;">Profile</button>
+            </div>
+            <div id ='sidebar' class="sidebar" style="visibility: hidden;">
+                <button onclick="location.href='/profile/{{user}}'" style="margin:15px; margin-bottom: 0px;">Profile Page</button><br>
+                <button onclick="location.href='/friends'" style="margin:15px; margin-bottom: 0px;">Friends</button><br>
+                <button onclick="location.href='/goodbye'" style="margin:15px; margin-bottom: 0px;">Sign Out</button><br>
+            </div>
+            <script>
+                function callsidebar() {
+                    var sidebar = document.getElementById('sidebar')
+                    if (sidebar.style.visibility == "hidden"){
+                        sidebar.style.visibility = "visible";
+                    }
+                    else {
+                        sidebar.style.visibility = "hidden";
+                    }
+                }
+            </script>
+        </div>
+        <script>
+            function findfriend(event) {
+                event.preventDefault();
+                const formData = new FormData(event.target)
+                console.log("SENDING")
+                fetch("/friends/find", {
+                    method: 'POST',
+                    body: formData,
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("RECIEVED")
+                    let user = "{{user}}"
+                    async = false
+                    var friendcheck = data
+                    var foundperson = document.getElementById("foundperson")
+                    foundperson.innerHTML = ''
+                    var ava = document.createElement("img")
+                    var n = document.createElement("p")
+                    ava.src = friendcheck.avatar
+                    ava.className = "avatar"
+                    n.innerHTML = `${friendcheck.username}`
+                    foundperson.appendChild(ava)
+                    foundperson.appendChild(n).classList.add("messagetext")
+                    if (friendcheck.username != user) {
+                        button = document.createElement("span")
+                        button.innerHTML = '<button id="addbutton" onclick=console.log("Friends!")>Add</button>'
+                        foundperson.appendChild(button).classList.add("messagetext")
+                    }
+                })
+            }
+        </script>
+        <div style="margin-top: 60px;" class="pagesplitter">
+            <div id="friendpage" class="leftbox">
+                <p>Friends</p>
+            </div>
+            <div id="requestpage" class="rightbox">
+                <form action="/friends/find" id="findnewfriendspage" method="POST" onsubmit="findfriend(event)">
+                    <input type="text" id="finduser" name="friendsearch" placeholder="Add New Friend">
+                    <button type="submit">Search</button>
+                </form>
+                <div id="foundperson">
+
+                </div>
+                <div id="incomingrequestspage" style="margin-top: 20px;">
+                    <p>Incoming Requests</p>
+                </div>
+                <div id="outgoingrequestspage" style="margin-top: 20px;">
+                    <p>Outgoing Requests</p>
+                </div>
+            </div>
+        </div>
+    </body>

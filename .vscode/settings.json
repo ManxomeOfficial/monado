@@ -1,0 +1,11 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "name": "users",
+            "database": "${workspaceFolder:monado}/.venv/users.db"
+        }
+    ],
+    "sqltools.useNodeRuntime": true
+}

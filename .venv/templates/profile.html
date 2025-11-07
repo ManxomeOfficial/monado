@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+    </head>
+    <script>
+        window.onload = init;
+        function init() {
+            let user = "{{user}}"
+            let currentuser = "{{currentuser}}"
+            var biography = "{{biography}}"
+            let edit = "{{edit}}"
+            console.log(edit)
+            document.getElementById("profpage").style.visibility="hidden";
+            document.getElementById("biography").style.visibility="visible";
+            if (edit == "True") {
+                document.getElementById("editbutton").style.visibility="visible";
+            }
+            if (edit == "False") {
+                document.getElementById("editbutton").style.visibility="hidden";
+            }
+        }
+        function editmode() {
+            document.getElementById("profpage").style.visibility="visible";
+            document.getElementById("biography").style.visibility="hidden";
+        }
+    </script>
+    <body>
+        <div>
+            <div class="webbar">
+                <button onclick="location.href='/home'" style="margin: 10px;">Monado</button>
+                <button onclick="callsidebar()" style="margin-left: auto; margin-right: 10px;">Profile</button>
+            </div>
+            <div id ='sidebar' class="sidebar" style="visibility: hidden;">
+                <button onclick="location.href='/profile/{{user}}'" style="margin:15px; margin-bottom: 0px;">Profile Page</button><br>
+                <button onclick="location.href='/friends'" style="margin:15px; margin-bottom: 0px;">Friends</button><br>
+                <button onclick="location.href='/goodbye'" style="margin:15px; margin-bottom: 0px;">Sign Out</button><br>
+            </div>
+            <script>
+                function callsidebar() {
+                    var sidebar = document.getElementById('sidebar')
+                    if (sidebar.style.visibility == "hidden"){
+                        sidebar.style.visibility = "visible";
+                    }
+                    else {
+                        sidebar.style.visibility = "hidden";
+                    }
+                }
+            </script>
+        </div>
+        <div style="margin-top: 60px;">
+            <img src="{{avatar}}" alt="Avatar" class="avatar"><h2 style="display: inline-block;">{{user}}</h2>
+        </div>
+        <p id="biography">{{biography}}</p>
+        <button id="editbutton" onclick=editmode()>Edit</button>
+        <div id="profpage">
+            <form action="/profile/{{user}}" method="POST" enctype="multipart/form-data">
+                <input type="text" name="biographyupdate" placeholder="{{biography}}" autocomplete="off" style="width: 250px; height: 100px;">
+                <input type="file" accept=".png, .jpg" name="avatar_upload" placeholder="Upload Avatar">
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    </body>

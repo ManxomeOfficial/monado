@@ -1,4 +1,64 @@
-
-Almighty: Anyone Here?
+Log
+Almighty: A
+Almighty: A
+Almighty: Check
+Almighty: Direction Plan: Focus on SQL Database first, introduce user profiles (with passwords) and then use those profiles to store chat messages in a database as well so they stay seperated
+Almighty: Then: \n - Make a home page \n - Allow different chat rooms \n - Add a profile page
+Almighty: Check
+Almighty: TESTING
+Almighty: Hey whats up
+Almighty: Nothing much hbu
 Almighty: Testing Testing
-Almighty: 
+Almighty: Check
+Almighty: A
+Almighty: Yo
+Almighty: Test
+Almighty: Good Morning
+Almighty: Hey Hey!
+Almighty: Hey
+Almighty: Sup
+Almighty: Testing
+Almighty: Hey!
+Almighty: Check
+Almighty: Testing
+Almighty: This is a test
+Regular: Random Dude Check
+Almighty: Glad all is working well
+Almighty: Hey!
+Almighty: I'm glad this works well
+Almighty: "But does this?"
+Almighty: Line space between messages could use some work. MAYBE. idk can't tell what I like but it's minor
+Almighty: Hello
+Almighty: Sup
+Regular: Hey
+Almighty: Hello
+Almighty: Hello
+Almighty: Testing
+Almighty: Wazzup
+Almighty: Testing @ Global Chats #1 Chats Fan!!!
+Almighty: Hello
+Almighty: Test
+Almighty: Image Test
+Almighty: Normal
+Almighty: Test
+Almighty: Check
+Almighty: A
+Almighty: B
+Almighty: C
+Almighty: Hey!
+Almighty: Check
+Almighty: Image Test
+Almighty: Run
+Almighty: Hey
+Almighty: test
+Almighty: TESTING
+Almighty: It doesn't like just text
+Almighty: All is well now
+Almighty: Testing
+Almighty: Image Test
+Almighty: Check
+Almighty: Img Check
+Almighty: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+Almighty: Text and Image chat uploads complete
+Almighty: GIF Test
+Almighty: Wowie! Chat works well!

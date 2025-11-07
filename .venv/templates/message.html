@@ -3,12 +3,103 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <h2>Welcome to message board</h2>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
     </head>
     <body>
-        <pre>{{say}}</pre>
-        <form action="/chat" method="POST">
-            <input type="text" name="message" style="width: 500px;">
+        <div>
+            <div class="webbar">
+                <button onclick="location.href='/home'" style="margin: 10px;">Monado</button>
+                <button onclick="callsidebar()" style="margin-left: auto; margin-right: 10px;">Profile</button>
+            </div>
+            <div id ='sidebar' class="sidebar" style="visibility: hidden;">
+                <button onclick="location.href='/profile/{{user}}'" style="margin:15px; margin-bottom: 0px;">Profile Page</button><br>
+                <button onclick="location.href='/friends'" style="margin:15px; margin-bottom: 0px;">Friends</button><br>
+                <button onclick="location.href='/goodbye'" style="margin:15px; margin-bottom: 0px;">Sign Out</button><br>
+            </div>
+            <script>
+                function callsidebar() {
+                    var sidebar = document.getElementById('sidebar')
+                    if (sidebar.style.visibility == "hidden"){
+                        sidebar.style.visibility = "visible";
+                    }
+                    else {
+                        sidebar.style.visibility = "hidden";
+                    }
+                }
+            </script>
+        </div>
+        </body>
+        <h2 style="margin-top: 60px; margin-bottom: 0;">Welcome to message board</h2>
+        <script onload>
+            function loadhistory() {
+                fetch('/chatlog/{{currentchat}}', {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    for (let his=0; his<Object.keys(data).length; his++) {
+                        console.log("Test data is: :", data[his].content) // <---------------- Sort this guy out into printing each old message
+                        newmessage(data[his].username, data[his].avatar, data[his].content, data[his].image)
+                    }
+                })
+            }
+            loadhistory()
+        </script>
+        <script>
+            function formsubmission(event) {
+                let message = "{{message}}"
+                event.preventDefault();
+                const formData = new FormData(event.target)
+                fetch('/chat/{{currentchat}}', {
+                    method: 'POST',
+                    body: formData,
+                })
+                .then(response => response.json())
+                .then(data => {
+                    var recentmessage,
+                    async = false
+                    recentmessage = data
+                    newmessage(recentmessage.user, recentmessage.avatar, recentmessage.message, recentmessage.image)
+                })
+            }
+            function newmessage(user, avatar, message, image = "None") {
+                console.log("HTML: " + avatar);
+                let thatuser = user
+                let container = document.getElementById("messagecontainer")
+                var parent = document.createElement("div")
+                var ava = document.createElement("img")
+                var p = document.createElement("p")
+                var n = document.createElement("p") 
+                var a = document.createElement("a")
+                ava.src = avatar
+                ava.className = "avatar"
+                a.href = `/profile/${user}`
+                p.innerHTML = ` ${message}`
+                p.style = "width: 1750px;"
+                n.innerHTML = `${user}:`
+                n.classList.add("messagetext")
+                container.appendChild(parent)
+                parent.appendChild(a)
+                a.appendChild(ava)
+                parent.appendChild(n)
+                if (image != "None") {
+                    var img = document.createElement("img")
+                    img.src = image
+                    img.style = "max-height: 175px; width: auto;"
+                    parent.appendChild(img).classList.add("messagetext")
+                }
+                parent.appendChild(p).classList.add("messagetext")
+                document.getElementById("message-input").value = "";
+                document.getElementById("image-input").value = "";
+                window.scrollTo(0, document.body.scrollHeight);
+            }
+        </script>
+        <div id="messagecontainer"></div>
+        <div style="margin-top: 60px; bottom: 0;"></div>
+        <form action="/chat/{{currentchat}}" id="sendmessage" method="POST" class="messagebox" enctype="multipart/form-data" onsubmit="formsubmission(event)">
+            <input type="text" id="message-input" name="message" autocomplete="off" style="width: 70%; margin-top: 20px; margin-left: 15px;">
+            <input type="file" id="image-input" name="image" accept=".png, .jpg, .gif" name="image_upload" placeholder="+">
+            <button type="submit">Send</button>
         </form>
     </body>
 </html>
