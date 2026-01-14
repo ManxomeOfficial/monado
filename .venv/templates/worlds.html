@@ -18,6 +18,7 @@
                 <button onclick="location.href='/suggestion'" style="margin:15px; margin-bottom: 0px;">Suggestion Box</button><br>
                 <button onclick="location.href='/goodbye'" style="margin:15px; margin-bottom: 0px;">Sign Out</button><br>
             </div>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
             <script>
                 function callsidebar() {
                     var sidebar = document.getElementById('sidebar')
@@ -28,12 +29,10 @@
                         sidebar.style.visibility = "hidden";
                     }
                 }
+                var socket = io();
+                socket.on('connect', function() {
+                    socket.emit('my event', {data: 'connected'});
+                })
             </script>
         </div>
-        <div style="margin-top: 60px;">
-            <button onclick="location.href='/home'">Home</button>
-            <button onclick="location.href='/chat'">Chats</button>
-            <!-- <button onclick="location.href='/worlds'">Worlds</button> -->
-        </div>
     </body>
-</html>

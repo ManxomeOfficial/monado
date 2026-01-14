@@ -30,10 +30,12 @@
                 }
             </script>
         </div>
-        <div style="margin-top: 60px;">
-            <button onclick="location.href='/home'">Home</button>
-            <button onclick="location.href='/chat'">Chats</button>
-            <!-- <button onclick="location.href='/worlds'">Worlds</button> -->
-        </div>
+        <div style="margin-top: 60px;"></div>
+        <h4>Please Submit Your Suggestions Here</h4>
+        <form action="/suggestion" id="submitsuggestion" method="POST">
+            <input type="text" id="message-input" name="idea" autocomplete="off" style="width: 70%; height: 20%; margin-top: 20px; margin-left: 15px;">
+            <button type="submit">Send</button>
+        </form>
+        <p style="display: inline-block; white-space: pre-wrap;">{{box}}</p>
     </body>
 </html>

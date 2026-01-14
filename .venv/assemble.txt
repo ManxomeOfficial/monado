@@ -2,4 +2,6 @@ Pages with Sidebar:
     profile.html
     chats.html
     home.html
-    message.html 
+    message.html
+    friends.html
+    worlds.html

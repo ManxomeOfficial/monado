@@ -7,6 +7,7 @@
     </head>
     <body>
         <div>
+            <title>Monado</title>
             <div class="webbar">
                 <button onclick="location.href='/home'" style="margin: 10px;">Monado</button>
                 <button onclick="callsidebar()" style="margin-left: auto; margin-right: 10px;">Profile</button>
@@ -14,6 +15,7 @@
             <div id ='sidebar' class="sidebar" style="visibility: hidden;">
                 <button onclick="location.href='/profile/{{user}}'" style="margin:15px; margin-bottom: 0px;">Profile Page</button><br>
                 <button onclick="location.href='/friends'" style="margin:15px; margin-bottom: 0px;">Friends</button><br>
+                <button onclick="location.href='/suggestion'" style="margin:15px; margin-bottom: 0px;">Suggestion Box</button><br>
                 <button onclick="location.href='/goodbye'" style="margin:15px; margin-bottom: 0px;">Sign Out</button><br>
             </div>
             <script>
@@ -39,34 +41,64 @@
                 .then(data => {
                     for (let his=0; his<Object.keys(data).length; his++) {
                         console.log("Test data is: :", data[his].content) // <---------------- Sort this guy out into printing each old message
-                        newmessage(data[his].username, data[his].avatar, data[his].content, data[his].image)
+                        newmessage(data[his].username, data[his].avatar, data[his].content, data[his].date, data[his].time, data[his].image)
                     }
                 })
             }
             loadhistory()
         </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
         <script>
+            var socket = io();
             function formsubmission(event) {
                 let message = "{{message}}"
                 event.preventDefault();
                 const formData = new FormData(event.target)
+                socket.emit('messagesent', {data: formData})
                 fetch('/chat/{{currentchat}}', {
                     method: 'POST',
                     body: formData,
                 })
                 .then(response => response.json())
                 .then(data => {
-                    var recentmessage,
-                    async = false
-                    recentmessage = data
-                    newmessage(recentmessage.user, recentmessage.avatar, recentmessage.message, recentmessage.image)
                 })
             }
-            function newmessage(user, avatar, message, image = "None") {
+
+            socket.on("messageback", function(data) {
+                console.log(data);
+                newmessage(data.user, data.avatar, data.message, data.date, data.time, data.image)
+            })
+
+            function activatereply(replyingto) {
+                var ReplyingNotice = document.getElementById("ReplyingNotice")
+                ReplyingNotice.innerHTML = replyingto.p
+            }
+
+            function newmessage(user, avatar, message, date, time, image = "None") {
                 console.log("HTML: " + avatar);
                 let thatuser = user
                 let container = document.getElementById("messagecontainer")
                 var parent = document.createElement("div")
+                const ping = new Audio("{{ping}}");
+                parent.style = "width: fit-content;"
+                parent.addEventListener("contextmenu", function(event){
+                    event.preventDefault();
+                    var MessMenu = document.getElementById("MessMenu")
+                    var MessMenuTime = document.getElementById("MessMenuTime")
+                    var MessReply = document.getElementById("MessReply")
+                    MessMenu.style.display = 'block'
+                    MessMenu.style.left = (event.pageX - 10)+"px"
+                    MessMenu.style.top = (event.pageY - 10)+"px"
+                    parent.style = "background-color: lightgrey;"
+                    MessMenuTime.innerHTML = "Sent on: " + date + " at " + time
+                    MessReply.onsubmit = `activatereply(${parent})`
+                    document.addEventListener('click', function(event) {
+                        if (!MessMenu.contains(event.target)) {
+                            MessMenu.style.display = 'none';
+                            parent.style = "background-color: white;"
+                        }
+                    })
+                })
                 var ava = document.createElement("img")
                 var p = document.createElement("p")
                 var n = document.createElement("p") 
@@ -92,6 +124,7 @@
                 document.getElementById("message-input").value = "";
                 document.getElementById("image-input").value = "";
                 window.scrollTo(0, document.body.scrollHeight);
+                ping.play();
             }
         </script>
         <div id="messagecontainer"></div>
@@ -100,6 +133,11 @@
             <input type="text" id="message-input" name="message" autocomplete="off" style="width: 70%; margin-top: 20px; margin-left: 15px;">
             <input type="file" id="image-input" name="image" accept=".png, .jpg, .gif" name="image_upload" placeholder="+">
             <button type="submit">Send</button>
+            <p id="ReplyingNotice" style="margin-left: 10px;"></p>
         </form>
+        <menu id="MessMenu" style="display: none;">
+            <p id="MessMenuTime" style="white-space: nowrap;">Time</p>
+            <button id="MessReply" onclick="activatereply()">Unimplemented</button>
+        </menu>
     </body>
 </html>

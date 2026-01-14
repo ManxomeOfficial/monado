@@ -7,6 +7,7 @@
     </head>
     <body>
         <div>
+            <title>Monado</title>
             <div class="webbar">
                 <button onclick="location.href='/home'" style="margin: 10px;">Monado</button>
                 <button onclick="callsidebar()" style="margin-left: auto; margin-right: 10px;">Profile</button>
@@ -14,6 +15,7 @@
             <div id ='sidebar' class="sidebar" style="visibility: hidden;">
                 <button onclick="location.href='/profile/{{user}}'" style="margin:15px; margin-bottom: 0px;">Profile Page</button><br>
                 <button onclick="location.href='/friends'" style="margin:15px; margin-bottom: 0px;">Friends</button><br>
+                <button onclick="location.href='/suggestion'" style="margin:15px; margin-bottom: 0px;">Suggestion Box</button><br>
                 <button onclick="location.href='/goodbye'" style="margin:15px; margin-bottom: 0px;">Sign Out</button><br>
             </div>
             <script>
@@ -29,7 +31,99 @@
             </script>
         </div>
         <script>
-            function findfriend(event) {
+            var fwho
+            function loadfriends() {
+                senddata = {"type": "List"}
+                fetch("/friends/add", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(senddata)
+                })
+                .then(response => response.json()) // ===================== LOAD DETAILS
+                .then(data => {
+                    for (let size=0; size<(data[0]).length; size++) {
+                        var fname = data[0][size].username
+                        var favatar = data[0][size].avatar
+                        var outgoing = document.getElementById("outgoingrequestspage")
+                        var parent = document.createElement("div")
+                        var a = document.createElement("a")
+                        var ava = document.createElement("img")
+                        var n = document.createElement("p")
+                        parent.id = `${fname}_out`
+                        a.href = `/profile/${fname}`
+                        ava.src = favatar
+                        ava.className = "avatar"
+                        n.innerHTML = `${fname}`
+                        outgoing.appendChild(parent)
+                        parent.appendChild(a)
+                        a.appendChild(ava)
+                        parent.appendChild(n).classList.add("messagetext")
+                        sub = document.createElement("sub")
+                        sub.style = "margin-left: 5px;"
+                        sub.innerHTML = "Awaiting Response..."
+                        parent.appendChild(sub)
+                        addbutton = document.createElement("span")
+                        addbutton.innerHTML = `<button onclick="unsendfriend('${fname}')" class="spookybutton" style="margin-left: 10px;">Rescind</button>`
+                        parent.appendChild(addbutton).classList.add("messagetext")
+                        foundperson.innerHTML = ''
+                    }
+                    for (let size=0; size<(data[1]).length; size++) {
+                        var fname = data[1][size].username
+                        var favatar = data[1][size].avatar
+                        var outgoing = document.getElementById("incomingrequestspage")
+                        var parent = document.createElement("div")
+                        var a = document.createElement("a")
+                        var ava = document.createElement("img")
+                        var n = document.createElement("p")
+                        parent.id = `${fname}_in`
+                        a.href = `/profile/${fname}`
+                        ava.src = favatar
+                        ava.className = "avatar"
+                        n.innerHTML = `${fname}`
+                        outgoing.appendChild(parent)
+                        parent.appendChild(a)
+                        a.appendChild(ava)
+                        parent.appendChild(n).classList.add("messagetext")
+                        addbutton = document.createElement("span")
+                        addbutton2 = document.createElement("span")
+                        addbutton.innerHTML = `<button onclick="acceptfriend('${fname}')" style="margin-left: 10px;">Accept</button>`
+                        addbutton2.innerHTML = `<button onclick="denyfriend('${fname}')" style="margin-left: 10px;">Deny</button>`
+                        parent.appendChild(addbutton).classList.add("messagetext")
+                        parent.appendChild(addbutton2).classList.add("messagetext")
+                        foundperson.innerHTML = ''
+                    }
+                    for (let size=0; size<(data[2]).length; size++) {
+                        var fname = data[2][size].username
+                        var favatar = data[2][size].avatar
+                        var outgoing = document.getElementById("friendpage")
+                        var parent = document.createElement("div")
+                        var a = document.createElement("a")
+                        var ava = document.createElement("img")
+                        var n = document.createElement("p")
+                        parent.id = `${fname}`
+                        a.href = `/profile/${fname}`
+                        ava.src = favatar
+                        ava.className = "avatar"
+                        n.innerHTML = `${fname}`
+                        outgoing.appendChild(parent)
+                        parent.appendChild(a)
+                        a.appendChild(ava)
+                        parent.appendChild(n).classList.add("messagetext")
+                        addbutton = document.createElement("span")
+                        addbutton.innerHTML = `<button onclick="unfriend('${fname}')" style="margin-left: 10px;">Unfriend</button>`
+                        parent.appendChild(addbutton).classList.add("messagetext")
+                        sub = document.createElement("sub")
+                        sub.style = "margin-left: 5px;"
+                        sub.innerHTML = `${data[2][size].active}`
+                        parent.appendChild(sub)
+                        foundperson.innerHTML = ''
+                    }
+                })
+            }
+            loadfriends()
+            function findfriend(event) { // ========================== FIND POSSIBLE FRIENDS
                 event.preventDefault();
                 const formData = new FormData(event.target)
                 console.log("SENDING")
@@ -40,22 +134,142 @@
                 .then(response => response.json())
                 .then(data => {
                     console.log("RECIEVED")
+                    console.log("{{user}}")
+                    console.log(data.username)
                     let user = "{{user}}"
                     async = false
                     var friendcheck = data
                     var foundperson = document.getElementById("foundperson")
                     foundperson.innerHTML = ''
+                    var a = document.createElement("a")
                     var ava = document.createElement("img")
                     var n = document.createElement("p")
+                    a.href = `/profile/${friendcheck.username}`
                     ava.src = friendcheck.avatar
                     ava.className = "avatar"
                     n.innerHTML = `${friendcheck.username}`
-                    foundperson.appendChild(ava)
+                    foundperson.appendChild(a)
+                    a.appendChild(ava)
                     foundperson.appendChild(n).classList.add("messagetext")
                     if (friendcheck.username != user) {
-                        button = document.createElement("span")
-                        button.innerHTML = '<button id="addbutton" onclick=console.log("Friends!")>Add</button>'
-                        foundperson.appendChild(button).classList.add("messagetext")
+                        console.log("UIN")
+                        if (document.getElementById(`${friendcheck.username}`) == null) {
+                            addbutton = document.createElement("span")
+                            addbutton.innerHTML = `<button id='addbutton' onclick='addfriend("${friendcheck.username}", "${friendcheck.avatar}")' style='margin-left: 2px'>Add</button>`
+                            foundperson.appendChild(addbutton).classList.add("messagetext")
+                        }
+                    }
+                    fwho = (friendcheck.username, friendcheck.avatar)
+                })
+            }
+            function addfriend(fname, favatar) {
+                console.log("ADD FRIEND")
+                senddata = {"type": "Send", "fname": fname}
+                fetch("/friends/add", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(senddata)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data.Status)
+                    if (data.Status == "Success") {
+                        var outgoing = document.getElementById("outgoingrequestspage")
+                        var parent = document.createElement("div")
+                        var a = document.createElement("a")
+                        var ava = document.createElement("img")
+                        var n = document.createElement("p")
+                        parent.id = `${fname}_out`
+                        a.href = `/profile/${fname}`
+                        ava.src = favatar
+                        ava.className = "avatar"
+                        n.innerHTML = `${fname}`
+                        outgoing.appendChild(parent)
+                        parent.appendChild(a)
+                        a.appendChild(ava)
+                        parent.appendChild(n).classList.add("messagetext")
+                        sub = document.createElement("sub")
+                        sub.style = "margin-left: 5px;"
+                        sub.innerHTML = "Awaiting Response..."
+                        parent.appendChild(sub)
+                        addbutton = document.createElement("span")
+                        addbutton.innerHTML = `<button onclick="unsendfriend('${fname}')" class="spookybutton" style="margin-left: 10px;">Rescind</button>`
+                        parent.appendChild(addbutton).classList.add("messagetext")
+                        foundperson.innerHTML = ''
+                    }
+                })
+            }
+            function unsendfriend(who) {
+                console.log("UNSEND FRIEND")
+                senddata = {"type": "Rescind", "fname": who}
+                fetch("/friends/add", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(senddata)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.Status == "Success") {
+                        parent = document.getElementById(`${who}_out`)
+                        parent.remove()
+                    }
+                })
+            }
+            function acceptfriend(who) {
+                console.log("ACCEPT FRIEND")
+                senddata = {"type": "Accept", "fname": who}
+                fetch("/friends/add", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(senddata)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.Status == "Success") {
+                        parent = document.getElementById(`${who}_in`)
+                        parent.remove()
+                    }
+                })
+            }
+            function denyfriend(who) {
+                console.log("DENY FRIEND REQUEST")
+                senddata = {"type":"Deny", "fname": who}
+                fetch("/friends/add", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(senddata)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.Status == "Success") {
+                        parent = document.getElementById(`${who}_in`)
+                        parent.remove()
+                    }
+                })
+            }
+            function unfriend(who) {
+                console.log("UN FRIEND")
+                senddata = {"type": "Unfriend", "fname": who}
+                fetch("/friends/add", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(senddata)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.Status == "Success") {
+                        parent = document.getElementById(`${who}`)
+                        parent.remove()
                     }
                 })
             }
@@ -72,11 +286,11 @@
                 <div id="foundperson">
 
                 </div>
+                <p>Incoming Requests</p>
                 <div id="incomingrequestspage" style="margin-top: 20px;">
-                    <p>Incoming Requests</p>
                 </div>
+                <p>Outgoing Requests</p>
                 <div id="outgoingrequestspage" style="margin-top: 20px;">
-                    <p>Outgoing Requests</p>
                 </div>
             </div>
         </div>

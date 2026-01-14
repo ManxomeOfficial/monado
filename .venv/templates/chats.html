@@ -7,6 +7,7 @@
     </head>
     <body>
         <div>
+            <title>Monado</title>
             <div class="webbar">
                 <button onclick="location.href='/home'" style="margin: 10px;">Monado</button>
                 <button onclick="callsidebar()" style="margin-left: auto; margin-right: 10px;">Profile</button>
@@ -14,6 +15,7 @@
             <div id ='sidebar' class="sidebar" style="visibility: hidden;">
                 <button onclick="location.href='/profile/{{user}}'" style="margin:15px; margin-bottom: 0px;">Profile Page</button><br>
                 <button onclick="location.href='/friends'" style="margin:15px; margin-bottom: 0px;">Friends</button><br>
+                <button onclick="location.href='/suggestion'" style="margin:15px; margin-bottom: 0px;">Suggestion Box</button><br>
                 <button onclick="location.href='/goodbye'" style="margin:15px; margin-bottom: 0px;">Sign Out</button><br>
             </div>
             <script>
@@ -28,7 +30,154 @@
                 }
             </script>
         </div>
+        <script>
+            if (newlist == null) {
+                var newlist
+            }
+            document.addEventListener('DOMContentLoaded', function() {
+                const newprivchatbtn = document.getElementById('newprivchatbtn');
+                const newprivchat = document.getElementById('newprivchat');
+                const cancelnewpriv = document.getElementById('cancelnewpriv');
+                const submitnewpriv = document.getElementById('submitnewpriv');
+
+                newprivchatbtn.onclick = function() {
+                    newprivchat.style.display = 'flex';
+                    newlist = []
+                    senddata = {"type": "List"}
+                    fetch("/friends/add", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(senddata)
+                    })
+                    .then(response => response.json()) // ===================== LOAD DETAILS
+                    .then(data => {
+                        for (let size=0; size<(data[2]).length; size++) {
+                            var fname = data[2][size].username
+                            var favatar = data[2][size].avatar
+                            var outgoing = document.getElementById("friendlist")
+                            var parent = document.createElement("div")
+                            var a = document.createElement("a")
+                            var ava = document.createElement("img")
+                            var n = document.createElement("p")
+                            parent.id = `${fname}_inlist`
+                            a.href = `/profile/${fname}`
+                            ava.src = favatar
+                            ava.className = "avatar"
+                            n.innerHTML = `${fname}`
+                            outgoing.appendChild(parent)
+                            parent.appendChild(a)
+                            a.appendChild(ava)
+                            parent.appendChild(n).classList.add("messagetext")
+                            addbutton = document.createElement("span")
+                            console.log(fname)
+                            addbutton.innerHTML = `<button onclick="addto('${fname}')" style="margin-left: 10px;">Add</button>`
+                            parent.appendChild(addbutton).classList.add("messagetext")
+                        }
+                    })
+                }
+
+                cancelnewpriv.onclick = function() {
+                    newprivchat.style.display = 'none';
+                    newlist = []
+                    document.getElementById("tempname").innerHTML = "New chat with:"
+                    document.getElementById("friendlist").innerHTML = ``
+                }
+
+                window.onclick = function(event) {
+                    if (event.target == newprivchat) {
+                        newprivchat.style.display = 'none'
+                        document.getElementById("friendlist").innerHTML = ``
+                        document.getElementById("tempname").innerHTML = "New chat with:"
+                        newlist = []
+                    }
+                }
+
+                submitnewpriv.onclick = function() {
+                    console.log(newlist)
+                    senddata = {"type": "NewChat", "addwho": newlist}
+                    fetch("/chat", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(senddata)
+                    })
+                    .then(response => response.json()) // ===================== LOAD DETAILS
+                    .then(data => {
+                        if (data.status == "Success") {
+                            parent = document.getElementById("private_chats")
+                            addbutton = document.createElement("span")
+                            addbutton.innerHTML = `<button onclick="location.href='/chat/${data.ID}'" style="margin-left: 10px;">${data.Backname}</button>`
+                            parent.appendChild(addbutton).classList.add("messagetext")
+                        }
+                    })
+                }
+            })
+
+            function loadchats() {
+                senddata = {"type": "LoadChats"}
+                    fetch("/chat", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(senddata)
+                    })
+                    .then(response => response.json()) // ===================== LOAD DETAILS
+                    .then(data => {
+                        for (let size=0; size<data.length; size++) {
+                            Console.log(data[size].Backname)
+                        }
+
+                    })
+            }
+            loadchats()
+
+            function addto(fname) {
+                var tempname = document.getElementById('tempname')
+                var texthold = tempname.textContent
+                var who = document.getElementById(`${fname}_inlist`)
+                who.classList.add("highlight")
+                who.children[2].innerHTML = `<button onclick="removefrom('${fname}')" style="margin-left: 10px;">Remove</button>`
+                tempname.innerHTML = `${texthold} ${fname}`
+                console.log(fname)
+                newlist.push(fname)
+            }
+
+            function removefrom(fname) {
+                var tempname = document.getElementById('tempname')
+                var texthold = tempname.textContent
+                var who = document.getElementById(`${fname}_inlist`)
+                who.classList.remove("highlight")
+                who.children[2].innerHTML = `<button onclick="addto('${fname}')" style="margin-left: 10px;">Add</button>`
+                tempname.innerHTML = tempname.innerHTML.replace(`${fname}`, "")
+                newlist.remove(fname)
+            }
+
+        </script>
+        <div style="margin-top: 60px;" class="pagesplitter">
+            <div id="private_chats" class="leftbox">
+                <p>Private Chats</p>
+                <button id="newprivchatbtn">New Chat</button>
+            </div>
+            <div id="public_chats" class="rightbox">
+                <p>Public Chats</p>
+            </div>
+        </div>
+        <div id="newprivchat" class="popup-overlay">
+            <div class="popup-content">
+                <h2>Start a new chat with whom?</h2>
+                <div id="friendlist" class="scrollbox">
+
+                </div>
+                <p id="tempname">New chat with:</p>
+                <button id="cancelnewpriv">Cancel</button>
+                <button id="submitnewpriv">Create</button>
+            </div>
+        </div>
         <div style="margin-top: 60px;">
-            <button onclick="location.href='/chat/1'">Global Chatroom</button>
+            <button onclick="location.href='/chat/g'">Global Chatroom</button>
         </div>
     </body>

@@ -5,6 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
     </head>
+    <title>Monado</title>
     <script>
         window.onload = init;
         function init() {
@@ -36,6 +37,7 @@
             <div id ='sidebar' class="sidebar" style="visibility: hidden;">
                 <button onclick="location.href='/profile/{{user}}'" style="margin:15px; margin-bottom: 0px;">Profile Page</button><br>
                 <button onclick="location.href='/friends'" style="margin:15px; margin-bottom: 0px;">Friends</button><br>
+                <button onclick="location.href='/suggestion'" style="margin:15px; margin-bottom: 0px;">Suggestion Box</button><br>
                 <button onclick="location.href='/goodbye'" style="margin:15px; margin-bottom: 0px;">Sign Out</button><br>
             </div>
             <script>
