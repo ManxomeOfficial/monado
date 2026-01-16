@@ -95,24 +95,39 @@
                 }
 
                 submitnewpriv.onclick = function() {
-                    console.log(newlist)
-                    senddata = {"type": "NewChat", "addwho": newlist}
-                    fetch("/chat", {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(senddata)
-                    })
-                    .then(response => response.json()) // ===================== LOAD DETAILS
-                    .then(data => {
-                        if (data.status == "Success") {
-                            parent = document.getElementById("private_chats")
-                            addbutton = document.createElement("span")
-                            addbutton.innerHTML = `<button onclick="location.href='/chat/${data.ID}'" style="margin-left: 10px;">${data.Backname}</button>`
-                            parent.appendChild(addbutton).classList.add("messagetext")
-                        }
-                    })
+                    if (newlist != []) {
+                        newlist.push("{{user}}")
+                        console.log(newlist)
+                        senddata = {"type": "NewChat", "addwho": newlist}
+                        fetch("/chat", {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(senddata)
+                        })
+                        .then(response => response.json()) // ===================== LOAD DETAILS
+                        .then(data => {
+                            if (data.Status == "Success") {
+                                console.log("RETURNED")
+                                var container = document.getElementById("private_chats")
+                                var parent = document.createElement("div")
+                                var addbutton = document.createElement("span")
+                                addbutton.innerHTML = `<button onclick="location.href='/chat/${data.Backname}'" style="margin-left: 10px;">DM: ${data.Backname}</button>`
+                                container.appendChild(parent)
+                                parent.appendChild(addbutton).classList.add("messagetext")
+                                newprivchat.style.display = 'none';
+                                newlist = []
+                                document.getElementById("tempname").innerHTML = "New chat with:"
+                                document.getElementById("friendlist").innerHTML = ``
+                            } else {
+                                newlist = []
+                                document.getElementById("tempname").innerHTML = "New chat with:"
+                                document.getElementById("friendlist").innerHTML = ``
+                                newprivchat.style.display = 'none';
+                            }
+                        })
+                    }
                 }
             })
 
@@ -128,7 +143,12 @@
                     .then(response => response.json()) // ===================== LOAD DETAILS
                     .then(data => {
                         for (let size=0; size<data.length; size++) {
-                            Console.log(data[size].Backname)
+                            var container = document.getElementById("private_chats")
+                            var parent = document.createElement("div")
+                            var addbutton = document.createElement("span")
+                            addbutton.innerHTML = `<button onclick="location.href='/chat/${data[size].Backname}'" style="margin-top: 5px;">DM: ${data[size].Backname}</button>`
+                            container.appendChild(parent)
+                            parent.appendChild(addbutton).classList.add("messagetext")
                         }
 
                     })
@@ -164,6 +184,7 @@
             </div>
             <div id="public_chats" class="rightbox">
                 <p>Public Chats</p>
+                <button onclick="location.href='/chat/g'">Global Chatroom</button>
             </div>
         </div>
         <div id="newprivchat" class="popup-overlay">
@@ -176,8 +197,5 @@
                 <button id="cancelnewpriv">Cancel</button>
                 <button id="submitnewpriv">Create</button>
             </div>
-        </div>
-        <div style="margin-top: 60px;">
-            <button onclick="location.href='/chat/g'">Global Chatroom</button>
         </div>
     </body>

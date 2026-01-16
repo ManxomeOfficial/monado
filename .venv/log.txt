@@ -90,3 +90,9 @@ Almighty: D
 Almighty: B
 Almighty: A
 Almighty: C
+Almighty: Testing <small>features</small> out
+Almighty: Pretty <bold>funny that </bold> this works
+Almighty: <b>check</b>
+Almighty: <em>emphasized</em> text
+Almighty: <i>Italics</i> text
+Almighty: Test!

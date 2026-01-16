@@ -6,13 +6,29 @@
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
     </head>
     <body>
-        <div class="webbar">
-            <button onclick="location.href='/home'" style="margin: 10px;">Monado</button>
-            <button onclick="location.href='/profile/{{user}}'" style="margin-left: auto; margin-right: 10px;">Profile</button>
-        </div>
-        <div class="sidebar">
-            <button onclick="location.href='/goodbye'">Sign Out</button>
-            <button onclick="location.href='/home'">Homepage</button>
+        <div>
+            <title>Monado</title>
+            <div class="webbar">
+                <button onclick="location.href='/home'" style="margin: 10px;">Monado</button>
+                <button onclick="callsidebar()" style="margin-left: auto; margin-right: 10px;">Profile</button>
+            </div>
+            <div id ='sidebar' class="sidebar" style="visibility: hidden;">
+                <button onclick="location.href='/profile/{{user}}'" style="margin:15px; margin-bottom: 0px;">Profile Page</button><br>
+                <button onclick="location.href='/friends'" style="margin:15px; margin-bottom: 0px;">Friends</button><br>
+                <button onclick="location.href='/suggestion'" style="margin:15px; margin-bottom: 0px;">Suggestion Box</button><br>
+                <button onclick="location.href='/goodbye'" style="margin:15px; margin-bottom: 0px;">Sign Out</button><br>
+            </div>
+            <script>
+                function callsidebar() {
+                    var sidebar = document.getElementById('sidebar')
+                    if (sidebar.style.visibility == "hidden"){
+                        sidebar.style.visibility = "visible";
+                    }
+                    else {
+                        sidebar.style.visibility = "hidden";
+                    }
+                }
+            </script>
         </div>
     </body> 
 

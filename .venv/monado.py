@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, session, redirect, url_for, current_app, g, jsonify
 from werkzeug.utils import secure_filename
 from flask_bcrypt import Bcrypt
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, join_room, leave_room
 import sqlite3, os, json, datetime
 from pathlib import Path
 from waitress import serve
@@ -42,6 +42,7 @@ init_db()
 @app.route("/", methods=["POST", "GET"])
 def welcome():
     if 'username' not in session:
+        notice = ""
         if request.method == "POST":
             db = get_db()
             try:
@@ -53,9 +54,11 @@ def welcome():
                     return redirect(url_for('home'))
                 else:
                     print("Wrong Password!")
+                    notice = "This is not the correct password"
             except Exception:
                 print("username does not exist")
-        return render_template("welcome.html")
+                notice = "This user account does not exist"
+        return render_template("welcome.html", notice=notice)
     else:
         return redirect(url_for('home'))
 
@@ -67,7 +70,7 @@ def create():
             db.execute(f'INSERT INTO user (username, avatar, pass) VALUES (?, ?, ?);', (request.form['username'], url_for('static', filename='img/default_avatar.png'), bcrypt.generate_password_hash(request.form['password']).decode('utf-8')))
             db.execute(f"INSERT INTO profilepage (username, biography) VALUES (?, ?);", (request.form['username'], "I'm new!"))
             db.execute(f"CREATE TABLE IF NOT EXISTS {request.form['username']}_friends (friend TEXT);")
-            db.execute(f"CREATE TABLE IF NOT EXISTS {request.form['username']}_chats (id INTEGER);")
+            db.execute(f"CREATE TABLE IF NOT EXISTS {request.form['username']}_chats (backname TEXT);")
             db.commit()
             return redirect(url_for('welcome'))
         else:
@@ -91,26 +94,22 @@ def chats():
         data = request.json
         if data["type"] == "NewChat":
             print("Working")
-            newback = ",".join(data['addwho'])
-            if db.execute(f"SELECT id FROM privchats WHERE backname='{newback}'").fetchone() == None:
-                db.execute(f"INSERT INTO privchats (backname) VALUES ('{newback}')")
-                newid = db.execute(f"SELECT id FROM privchats WHERE backname='{newback}'").fetchone()[0]
-                db.execute(f"CREATE TABLE IF NOT EXISTS chatlog_{newid} (id INTEGER AUTO_INCREMENT PRIMARY KEY, username TEXT, senddate DATE, sendtime TIME, content TEXT, img_attachment IMAGE)")
+            newback = "_".join(data['addwho'])
+            if db.execute(f"SELECT backname FROM {session['username']}_chats WHERE backname='{newback}'").fetchone() == None:
+                print("NONE!!!")
+                db.execute(f"CREATE TABLE IF NOT EXISTS chatlog_{newback} (id INTEGER AUTO_INCREMENT PRIMARY KEY, username TEXT, senddate DATE, sendtime TIME, content TEXT, img_attachment IMAGE)")
                 for user in data["addwho"]:
-                    print(user)
-                    db.execute(f"INSERT INTO {user}_chats (id) VALUES ({newid})")
+                    db.execute(f"INSERT INTO {user}_chats (backname) VALUES ('{newback}')")
                 db.commit()
-                return jsonify({"Status":"Success", "Backname":data['addwho'], "ID":newid})
+                return jsonify({"Status":"Success", "Backname":data['addwho']})
             else:
                 return jsonify({"Status":"Exists"})
         if data["type"] == "LoadChats":
             sdata = []
             size = db.execute(f"SELECT rowid FROM {session['username']}_chats ORDER BY rowid DESC limit 1").fetchone()[0]
             for i in range(size, 0, -1):
-                currentchat = db.execute(f"SELECT id FROM {session['username']}_chats WHERE rowid = {size - (i-1)}").fetchone()[0]
-                namedata = db.execute(f"SELECT chatname FROM privchats WHERE id = currentchat").fetchone()[0]
-                avatardata = db.execute(f"SELECT backname FROM privchats WHERE id = currentchat").fetchone()[0]
-                data = {"Chatname":namedata, "Backname":avatardata}
+                currentchat = db.execute(f"SELECT backname FROM {session['username']}_chats WHERE rowid = {size - (i-1)}").fetchone()[0]
+                data = {"Chatname":currentchat, "Backname":currentchat}
                 sdata.append(data)
             print(sdata)
             return jsonify(sdata)
@@ -152,7 +151,7 @@ def chat(currentchat):
             "date": datetime.now().strftime("%D"),
             "time": datetime.now().strftime("%H:%M:%S")
         }
-        socketio.emit('messageback', data)
+        socketio.emit('messageback', data, namespace='/currentchat')
         return jsonify(data)
     return render_template("message.html", say=say.read_text(), user=session['username'], message=message, currentchat=currentchat, ping=url_for('static', filename='audio/ping.mp3'))
 
@@ -332,13 +331,16 @@ def goodbye():
 
 @app.route("/nuke", methods=["POST", "GET"])
 def nuke():
-    db = get_db()
-    db.execute("DROP TABLE IF EXISTS chatlog_1")
-    db.execute("DROP TABLE IF EXISTS friendrequests")
-    db.execute("DROP TABLE IF EXISTS user")
-    db.execute("DROP TABLE IF EXISTS privchats")
-    session.pop('username')
-    db.commit()
+    if session['username'] == "Almighty":
+        db = get_db()
+       # db.execute("DROP TABLE IF EXISTS chatlog_1")
+       # db.execute("DROP TABLE IF EXISTS friendrequests")
+        db.execute("DROP TABLE IF EXISTS user")
+        db.execute("DROP TABLE IF EXISTS Almighty_chats")
+        db.execute("DROP TABLE IF EXISTS Regular_chats")
+        db.execute("DROP TABLE IF EXISTS privchats")
+        session.pop('username')
+        db.commit()
     return redirect(url_for('welcome'))
 
 if __name__ == '__main__':
